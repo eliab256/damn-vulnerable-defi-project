@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Damn Vulnerable DeFi v4 (https://damnvulnerabledefi.xyz)
-pragma solidity =0.8.25;
+pragma solidity ^0.8.25;
 
 import {Test, console} from "forge-std/Test.sol";
 import {DamnValuableToken} from "../../src/DamnValuableToken.sol";
 import {UnstoppableVault, Owned} from "../../src/unstoppable/UnstoppableVault.sol";
 import {UnstoppableMonitor} from "../../src/unstoppable/UnstoppableMonitor.sol";
+import {UnstoppableVaultAttacker} from "./UnstoppableAttacker.sol";
 
 contract UnstoppableChallenge is Test {
     address deployer = makeAddr("deployer");
@@ -92,6 +93,9 @@ contract UnstoppableChallenge is Test {
      */
     function test_unstoppable() public checkSolvedByPlayer {
         
+        UnstoppableVaultAttacker attacker = new UnstoppableVaultAttacker(address(vault));
+        token.transfer(address(attacker), INITIAL_PLAYER_TOKEN_BALANCE);
+        attacker.attack();
     }
 
     /**
