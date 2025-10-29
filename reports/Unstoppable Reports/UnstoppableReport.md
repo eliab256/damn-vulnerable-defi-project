@@ -1,3 +1,5 @@
+Prepared by: [Elia Bordoni](https://elia-bordoni-blockchain-dev.netlify.app/)
+
 ### Damn Vulnerable DeFi: Unstoppable
 
 ## The assertion if (convertToShares(totalSupply) != balanceBefore) revert InvalidBalance(); cause DOS if transfer token directly to the contract without passing throgh the deposit function
