@@ -1,11 +1,60 @@
+---
+title: Damn Vulnerable DeFi Side-Entrance Finding Report
+author: Elia Bordoni
+date: October 30, 2025
+header-includes:
+  - \usepackage{titling}
+  - \usepackage{graphicx}
+---
+
+\begin{titlepage}
+\centering
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{logo.pdf}
+\end{figure}
+\vspace*{2cm}
+{\Huge\bfseries Damn Vulnerable Defi Finding Report\par}
+\vspace{1cm}
+{\Large Version 1.0\par}
+\vspace{2cm}
+{\Large\itshape Elia Bordoni\par}
+\vfill
+{\large \today\par}
+\end{titlepage}
+
+\maketitle
+
 Prepared by: [Elia Bordoni](https://elia-bordoni-blockchain-dev.netlify.app/)
 
-### Damn Vulnerable DeFi: Unstoppable
+# Table of Contents
 
-**Exercise** A surprisingly simple pool allows anyone to deposit ETH, and withdraw it at any point in time.
+- [Table of Contents](#table-of-contents)
+- [Exercise Summary](#exercise-summary)
+- [Audit Details](#audit-details)
+  - [Scope](#scope)
+  - [Tool Used](#tool-used)
+- [Findings](#findings)
+  - [\[S-H\] Protocol Allows Flash Loan Ether to Be Deposited and Marked as Repaid, Enabling Subsequent Unauthorized Withdrawals](#s-h-protocol-allows-flash-loan-ether-to-be-deposited-and-marked-as-repaid-enabling-subsequent-unauthorized-withdrawals)
+
+# Exercise Summary
+
+A surprisingly simple pool allows anyone to deposit ETH, and withdraw it at any point in time.
 It has 1000 ETH in balance already, and is offering free flashloans using the deposited ETH to promote their system. You start with 1 ETH in balance. Pass the challenge by rescuing all ETH from the pool and depositing it in the designated recovery account.
 
-## Protocol Allows Flash Loan Ether to Be Deposited and Marked as Repaid, Enabling Subsequent Unauthorized Withdrawals
+# Audit Details
+
+## Scope
+
+- SideEntranceLenderPool.sol
+
+## Tool Used
+
+- manual review
+
+# Findings
+
+### [S-H] Protocol Allows Flash Loan Ether to Be Deposited and Marked as Repaid, Enabling Subsequent Unauthorized Withdrawals
 
 **Description** The protocol allows users to take flash loans and ensures repayment by comparing the current balance of the contract with the balanceBefore value recorded at the beginning of the operation. However, the protocol also provides `SideEntranceLenderPool::deposit(uint256 _amount)` that updates the balances mapping. If, within the flash loan callback, instead of repaying the borrowed funds via a direct call, the borrower calls `SideEntranceLenderPool::deposit(uint256 _amount)` to return the Ether, the final repayment check will still pass successfully. This is because the Ether is indeed present in the contract’s balance, even though it has been credited to the attacker’s account in the balances mapping.
 As a result, the flash loan transaction completes without reverting, but the attacker retains a non-zero balances entry. After the transaction, the attacker can call `SideEntranceLenderPool::withdraw()` to drain the funds, effectively stealing all the deposited Ether.
@@ -13,7 +62,7 @@ As a result, the flash loan transaction completes without reverting, but the att
 <details>
 <summary>vulnerability</summary>
 
-```solidity
+```javascript
     function deposit() external payable {
         unchecked {
 @>          balances[msg.sender] += msg.value;
