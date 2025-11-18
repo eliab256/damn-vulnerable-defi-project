@@ -1,12 +1,60 @@
+---
+title: Damn Vulnerable DeFi Truster Finding Report
+author: Elia Bordoni
+date: November 18, 2025
+header-includes:
+  - \usepackage{titling}
+  - \usepackage{graphicx}
+---
+
+\begin{titlepage}
+\centering
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{logo.pdf}
+\end{figure}
+\vspace*{2cm}
+{\Huge\bfseries Damn Vulnerable Defi Finding Report\par}
+\vspace{1cm}
+{\Large Version 1.0\par}
+\vspace{2cm}
+{\Large\itshape Elia Bordoni\par}
+\vfill
+{\large \today\par}
+\end{titlepage}
+
+\maketitle
+
 Prepared by: [Elia Bordoni](https://elia-bordoni-blockchain-dev.netlify.app/)
 
-### Damn Vulnerable DeFi: Truster
+# Table of Contents
 
-**Exercise** More and more lending pools are offering flashloans. In this case, a new pool has launched that is offering flashloans of DVT tokens for free.
-The pool holds 1 million DVT tokens. You have nothing.
-To pass this challenge, rescue all funds in the pool executing a single transaction. Deposit the funds into the designated recovery account.
+- [Table of Contents](#table-of-contents)
+- [Exercise Summary](#exercise-summary)
+- [Audit Details](#audit-details)
+  - [Scope](#scope)
+  - [Tool Used](#tool-used)
+- [Findings](#findings)
+  - [\[S-H\] Protocol Allows Flash Loan Ether to Be Deposited and Marked as Repaid, Enabling Subsequent Unauthorized Withdrawals](#s-h-protocol-allows-flash-loan-ether-to-be-deposited-and-marked-as-repaid-enabling-subsequent-unauthorized-withdrawals)
 
-## FlashLoan function allows borrower to call any function from any contract, Pool contract itself too. Calling Approve is possible to drail all the token on the pool.
+# Exercise Summary
+
+More and more lending pools are offering flashloans. In this case, a new pool has launched that is offering flashloans of DVT tokens for free.
+The pool holds 1 million DVT tokens. You have nothing. To pass this challenge, rescue all funds in the pool executing a single transaction. Deposit the funds into the designated recovery account.
+
+# Audit Details
+
+## Scope
+
+- TrusterLenderPool.sol
+
+## Tool Used
+
+- manual review
+
+# Findings
+
+### [S-H]  FlashLoan function allows borrower to call any function from any contract, Pool contract itself too. Calling Approve is possible to drail all the token on the pool.
 
 **Description** The contract includes a function that allows users to request a flash loan. After the tokens are transferred to the borrower, the function performs a call to any target address using arbitrary data, without any restriction. Once the call is executed, it verifies that the loan has been repaid by comparing the final balance with the balanceBefore. A malicious user can request an arbitrary amount of tokens through the `TrusterLenderPool:flashLoan` function. By passing the pool contract itself as the target and supplying the function signature of `TrusterLenderPool:approve`, with the malicious contract set as the spender and the entire pool balance as the amount, an attacker can grant themselves approval. The attacker can then repay the borrowed tokens to successfully complete the flash loan without reverting, and immediately afterward call `TrusterLenderPool:transferFrom` to drain all tokens from the pool.
 
