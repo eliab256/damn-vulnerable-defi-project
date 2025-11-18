@@ -78,6 +78,7 @@ contract TrusterStealer {
 
 </details>
 
+<details>
 <summary>Attacker implementation on the test</summary>
 
 ```solidity
