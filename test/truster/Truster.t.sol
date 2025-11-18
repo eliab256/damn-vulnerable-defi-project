@@ -16,7 +16,7 @@ contract TrusterChallenge is Test {
 
     DamnValuableToken public token;
     TrusterLenderPool public pool;
-    TrusterStealer public trusterStealer;
+
 
     modifier checkSolvedByPlayer() {
         vm.startPrank(player, player);
@@ -54,8 +54,7 @@ contract TrusterChallenge is Test {
      */
     function test_truster() public checkSolvedByPlayer {
         
-        trusterStealer = new TrusterStealer(address(pool), address(token), recovery);
-        //trusterStealer.attack();
+        TrusterStealer trusterStealer = new TrusterStealer(address(pool), address(token), recovery);
     }   
 
     /**

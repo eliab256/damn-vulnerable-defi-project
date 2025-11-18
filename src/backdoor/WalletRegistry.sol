@@ -7,7 +7,9 @@ import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Safe} from "safe-smart-account/contracts/Safe.sol";
 import {SafeProxy} from "safe-smart-account/contracts/proxies/SafeProxy.sol";
-import {IProxyCreationCallback} from "safe-smart-account/contracts/proxies/IProxyCreationCallback.sol";
+import {
+    IProxyCreationCallback
+} from "safe-smart-account/contracts/proxies/IProxyCreationCallback.sol";
 
 /**
  * @notice A registry for Safe multisig wallets.
@@ -64,7 +66,12 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
      * @notice Function executed when user creates a Safe wallet via SafeProxyFactory::createProxyWithCallback
      *          setting the registry's address as the callback.
      */
-    function proxyCreated(SafeProxy proxy, address singleton, bytes calldata initializer, uint256) external override {
+    function proxyCreated(
+        SafeProxy proxy,
+        address singleton,
+        bytes calldata initializer,
+        uint256
+    ) external override {
         if (token.balanceOf(address(this)) < PAYMENT_AMOUNT) {
             // fail early
             revert NotEnoughFunds();
@@ -118,12 +125,23 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
         wallets[walletOwner] = walletAddress;
 
         // Pay tokens to the newly created wallet
-        SafeTransferLib.safeTransfer(address(token), walletAddress, PAYMENT_AMOUNT);
+        SafeTransferLib.safeTransfer(
+            address(token),
+            walletAddress,
+            PAYMENT_AMOUNT
+        );
     }
 
-    function _getFallbackManager(address payable wallet) private view returns (address) {
-        return abi.decode(
-            Safe(wallet).getStorageAt(uint256(keccak256("fallback_manager.handler.address")), 0x20), (address)
-        );
+    function _getFallbackManager(
+        address payable wallet
+    ) private view returns (address) {
+        return
+            abi.decode(
+                Safe(wallet).getStorageAt(
+                    uint256(keccak256("fallback_manager.handler.address")),
+                    0x20
+                ),
+                (address)
+            );
     }
 }
